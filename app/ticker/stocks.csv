@@ -1,0 +1,44 @@
+ticker,company_name,aliases,exchange,security_type
+AAPL,Apple Inc.,Apple|Apple Inc,NASDAQ,Common Stock
+AMD,Advanced Micro Devices Inc.,Advanced Micro Devices,NASDAQ,Common Stock
+AMZN,Amazon.com Inc.,Amazon,NASDAQ,Common Stock
+AVGO,Broadcom Inc.,Broadcom,NASDAQ,Common Stock
+BA,The Boeing Company,Boeing,NYSE,Common Stock
+BABA,Alibaba Group Holding Limited,Alibaba,NYSE,ADR
+BAC,Bank of America Corporation,Bank of America,NYSE,Common Stock
+BRK.B,Berkshire Hathaway Inc.,Berkshire Hathaway,NYSE,Common Stock
+COIN,Coinbase Global Inc.,Coinbase,NASDAQ,Common Stock
+COST,Costco Wholesale Corporation,Costco,NASDAQ,Common Stock
+CRWV,CoreWeave Inc.,CoreWeave,NASDAQ,Common Stock
+DIS,The Walt Disney Company,Disney,NYSE,Common Stock
+F,Ford Motor Company,Ford,NYSE,Common Stock
+GOOG,Alphabet Inc. Class C,Google|Alphabet,NASDAQ,Common Stock
+GOOGL,Alphabet Inc. Class A,Google|Alphabet,NASDAQ,Common Stock
+GME,GameStop Corp.,GameStop,NYSE,Common Stock
+HOOD,Robinhood Markets Inc.,Robinhood,NASDAQ,Common Stock
+INTC,Intel Corporation,Intel,NASDAQ,Common Stock
+JNJ,Johnson & Johnson,Johnson and Johnson,NYSE,Common Stock
+JPM,JPMorgan Chase & Co.,JPMorgan|JP Morgan,NYSE,Common Stock
+LCID,Lucid Group Inc.,Lucid,NASDAQ,Common Stock
+META,Meta Platforms Inc.,Meta|Facebook,NASDAQ,Common Stock
+MSFT,Microsoft Corporation,Microsoft,NASDAQ,Common Stock
+MSTR,Strategy Inc.,MicroStrategy|Strategy,NASDAQ,Common Stock
+NFLX,Netflix Inc.,Netflix,NASDAQ,Common Stock
+NIO,NIO Inc.,NIO,NYSE,ADR
+NVDA,NVIDIA Corporation,Nvidia,NASDAQ,Common Stock
+ORCL,Oracle Corporation,Oracle,NYSE,Common Stock
+PANW,Palo Alto Networks Inc.,Palo Alto Networks,NASDAQ,Common Stock
+PLTR,Palantir Technologies Inc.,Palantir,NASDAQ,Common Stock
+PYPL,PayPal Holdings Inc.,PayPal,NASDAQ,Common Stock
+QCOM,QUALCOMM Incorporated,Qualcomm,NASDAQ,Common Stock
+RIVN,Rivian Automotive Inc.,Rivian,NASDAQ,Common Stock
+RDDT,Reddit Inc.,Reddit,NYSE,Common Stock
+SMCI,Super Micro Computer Inc.,Supermicro|Super Micro Computer,NASDAQ,Common Stock
+SOFI,SoFi Technologies Inc.,SoFi,NASDAQ,Common Stock
+SPY,SPDR S&P 500 ETF Trust,S&P 500 ETF|SPY ETF,NYSE Arca,ETF
+TSLA,Tesla Inc.,Tesla,NASDAQ,Common Stock
+TSM,Taiwan Semiconductor Manufacturing Company,TSMC|Taiwan Semiconductor,NYSE,ADR
+UBER,Uber Technologies Inc.,Uber,NYSE,Common Stock
+V,Visa Inc.,Visa,NYSE,Common Stock
+WMT,Walmart Inc.,Walmart,NYSE,Common Stock
+XOM,Exxon Mobil Corporation,Exxon|ExxonMobil,NYSE,Common Stock

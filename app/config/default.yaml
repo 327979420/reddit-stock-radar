@@ -1,0 +1,60 @@
+subreddits:
+  - wallstreetbets
+  - stocks
+  - investing
+  - StockMarket
+  - options
+  - smallstreetbets
+  - pennystocks
+  - ValueInvesting
+data_source: arctic_shift
+poll_interval_minutes: 20
+minimum_post_score: 1
+minimum_comment_score: 1
+comments_per_post: 30
+posts_per_subreddit: 50
+hot_posts_for_comments: 15
+timezone: Australia/Melbourne
+daily_publish_time: "08:00"
+hot_posts_summary:
+  enabled: true
+  interval_days: 3
+  lookback_hours: 72
+  post_count: 5
+  publish_time: "08:10"
+  max_post_chars: 3000
+weights:
+  mentions: 0.25
+  unique_authors: 0.20
+  engagement: 0.20
+  subreddit_spread: 0.10
+  momentum: 0.25
+blacklist:
+  - "AI"
+  - "ALL"
+  - "ARE"
+  - "CAR"
+  - "DD"
+  - "FOR"
+  - "IT"
+  - "LOVE"
+  - "ON"
+  - "AP"
+  - "SO"
+stock_context_keywords:
+  - stock
+  - shares
+  - calls
+  - puts
+  - earnings
+  - buy
+  - sell
+  - bullish
+  - bearish
+  - portfolio
+  - price target
+  - market cap
+aliases: {}
+data_quality:
+  minimum_daily_posts: 1
+  volume_drop_warning_ratio: 0.25
