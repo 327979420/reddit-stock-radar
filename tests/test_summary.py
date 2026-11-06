@@ -6,6 +6,7 @@ from app.summary.service import (
     PostDigest,
     build_hot_posts_embed,
     build_prompt,
+    is_recurring_thread,
     prepare_posts,
 )
 
@@ -32,8 +33,18 @@ def test_summary_prompt_and_format_keep_source_mapping():
         overview="本期关注财报。", posts=[PostDigest(index=1, summary="网友讨论增长。")]
     )
     embed = build_hot_posts_embed(digest, posts)
-    assert embed["title"] == "🔥 热门帖子｜过去 72 小时"
+    assert embed["title"] == "🔥 Reddit 热帖｜过去 72 小时"
+    assert embed["description"] == "> 本期关注财报。"
     assert len(embed["fields"]) == 1
+    assert embed["fields"][0]["name"] == "1｜网友讨论增长。"
+    assert "*NVDA earnings discussion*" in embed["fields"][0]["value"]
     assert "https://www.reddit.com/r/stocks/comments/abc/example/" in embed["fields"][0]["value"]
     assert "↑ 1,200" in embed["fields"][0]["value"]
-    assert "网友讨论增长" in embed["fields"][0]["value"]
+
+
+def test_recurring_threads_are_skipped():
+    assert is_recurring_thread("What Are Your Moves Tomorrow, November 5, 2026")
+    assert is_recurring_thread("Daily Discussion Thread for November 4, 2026")
+    assert is_recurring_thread("Weekend Discussion Thread for the Weekend of November 7, 2026")
+    assert not is_recurring_thread("Dow Surges Over 1,000 Points in Broad Market Rebound")
+    assert not is_recurring_thread("NVDA earnings discussion")

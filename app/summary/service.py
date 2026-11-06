@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 
 from openai import AsyncOpenAI
@@ -16,6 +17,18 @@ class SummaryPost:
     comments: int
     permalink: str
     text: str
+
+
+# Megathreads such as "Daily Discussion Thread" top every engagement sort, but their
+# body is empty, so a summary of them says nothing.
+RECURRING_THREAD = re.compile(
+    r"\b(daily|weekend|weekly)\b.*\b(discussion|thread)\b|what are your moves tomorrow",
+    re.IGNORECASE,
+)
+
+
+def is_recurring_thread(title: str) -> bool:
+    return bool(RECURRING_THREAD.search(title))
 
 
 class PostDigest(BaseModel):
@@ -83,23 +96,22 @@ def build_hot_posts_embed(digest: HotPostsDigest, posts: list[SummaryPost]) -> d
     summaries = {item.index: item.summary for item in digest.posts}
     fields = []
     for index, post in enumerate(posts, 1):
-        summary = summaries.get(index, "本帖暂无摘要。")
+        # Lead with the Chinese takeaway; the English title and stats are supporting detail.
         fields.append(
             {
-                "name": f"{index} · r/{post.subreddit}",
+                "name": f"{index}｜{summaries.get(index, '本帖暂无摘要。')[:180]}",
                 "value": (
-                    f"**{post.title[:120]}**\n"
-                    f"{summary[:180]}\n"
-                    f"`↑ {post.score:,}`  `💬 {post.comments:,}`  "
-                    f"[查看原帖 ↗]({post.permalink})"
+                    f"*{post.title[:100]}*\n"
+                    f"`r/{post.subreddit}`  ↑ {post.score:,}  💬 {post.comments:,}  "
+                    f"[原帖 ↗]({post.permalink})"
                 ),
                 "inline": False,
             }
         )
     return {
-        "title": "🔥 热门帖子｜过去 72 小时",
-        "description": digest.overview[:300],
+        "title": "🔥 Reddit 热帖｜过去 72 小时",
+        "description": f"> {digest.overview[:300]}",
         "color": 0xF97316,
         "fields": fields,
-        "footer": {"text": "Reddit Stock Radar · AI 摘要"},
+        "footer": {"text": "Reddit Stock Radar · AI 摘要 · 网友观点，非投资建议"},
     }

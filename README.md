@@ -26,7 +26,7 @@ Attention change compares mentions with the preceding 24 hours. Heat combines me
 - **What is changing:** rising, falling, and newly appearing names, plus ranking changes and windows from 1 hour to 90 days.
 - **What people are talking about:** Chinese summaries of popular posts, shared themes, and crowd sentiment, with links back to the discussions.
 
-By default, Discord receives a daily Top 20 and a separate five-post digest every three days. Themes come from the selected posts; there is no dedicated bullish/bearish sentiment score.
+By default, Discord receives a daily Top 20 (the top three as headlines, the rest as a compact table) and a separate five-post digest every three days that skips recurring daily discussion threads. Themes come from the selected posts; there is no dedicated bullish/bearish sentiment score.
 
 ## How it works
 

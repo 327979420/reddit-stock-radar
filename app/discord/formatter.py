@@ -4,6 +4,8 @@ from datetime import datetime
 
 from app.scoring.service import MetricRow
 
+MEDALS = ("🥇", "🥈", "🥉")
+
 
 def rank_marker(change: int | None) -> str:
     if change is None:
@@ -17,21 +19,41 @@ def rank_marker(change: int | None) -> str:
 
 def pct(value: float | None, trend: str = "") -> str:
     if value is None:
-        return "BREAK" if trend == "New / Breakout" else "N/A"
+        return "NEW" if trend == "New / Breakout" else "N/A"
     return f"{value:+.0f}%"
 
 
+def window_label(window: str) -> str:
+    return window.replace("h", " 小时").replace("d", " 天")
+
+
 def format_radar(rows: list[MetricRow], now: datetime, window: str = "24h", limit: int = 20) -> str:
-    title = f"🔥 **Reddit 美股热度榜 · {window}｜{now:%d %b}**"
-    table = [f"{'#':>2} {'TICKER':<10} {'HEAT':>4} {'MENT':>6} {'24H':>8} {'RANK':>5}"]
-    for row in rows[:limit]:
-        table.append(
-            f"{row.rank:>2} {row.ticker:<10} {row.heat_score:>4.0f} "
-            f"{row.mentions:>6,} {pct(row.momentum_pct, row.trend):>8} "
-            f"{rank_marker(row.rank_change):>5}"
+    rows = rows[:limit]
+    lines = [
+        f"## 🔥 Reddit 美股热度榜 · {now.month}月{now.day}日",
+        f"-# 过去 {window_label(window)} · 热度综合提及、作者、互动、扩散与动能，满分 100",
+    ]
+    # The top three are the headline; Discord headings give them real visual weight.
+    for medal, row in zip(MEDALS, rows):
+        company = f" · {row.company[:24]}" if row.company and row.company != row.ticker else ""
+        lines.append(f"### {medal} {row.ticker}{company}")
+        lines.append(
+            f"-# 热度 {row.heat_score:.0f} · 提及 {row.mentions:,} · "
+            f"{window} {pct(row.momentum_pct, row.trend)} · 排名 {rank_marker(row.rank_change)}"
         )
-    lines = [title, f"```text\n{'\n'.join(table)}\n```"]
-    rising = sorted(rows, key=lambda row: row.momentum_pct or -9999, reverse=True)[:3]
+    if len(rows) > len(MEDALS):
+        table = [f"{'#':>2}  {'TICKER':<7} {'HEAT':>4} {'MENT':>5} {window.upper():>6}"]
+        for row in rows[len(MEDALS) :]:
+            table.append(
+                f"{row.rank:>2}  {row.ticker:<7} {row.heat_score:>4.0f} "
+                f"{row.mentions:>5,} {pct(row.momentum_pct, row.trend):>6}"
+            )
+        lines.append(f"```text\n{'\n'.join(table)}\n```")
+    rising = sorted(
+        (row for row in rows if (row.momentum_pct or 0) > 0),
+        key=lambda row: row.momentum_pct or 0,
+        reverse=True,
+    )[:3]
     new = [row.ticker for row in rows if row.trend == "New / Breakout"][:5]
     falling = sorted(
         (row for row in rows if (row.momentum_pct or 0) < 0),
@@ -39,16 +61,15 @@ def format_radar(rows: list[MetricRow], now: datetime, window: str = "24h", limi
     )[:3]
     if rising:
         lines.append(
-            "🔥 **升温** · "
-            + " · ".join(f"{row.ticker} {pct(row.momentum_pct, row.trend)}" for row in rising)
+            "📈 **升温**　" + " · ".join(f"{row.ticker} {pct(row.momentum_pct)}" for row in rising)
         )
     if new:
-        lines.append("🆕 **突破** · " + " · ".join(new))
+        lines.append("🆕 **新上榜**　" + " · ".join(new))
     if falling:
         lines.append(
-            "📉 **降温** · "
-            + " · ".join(f"{row.ticker} {pct(row.momentum_pct)}" for row in falling)
+            "📉 **降温**　" + " · ".join(f"{row.ticker} {pct(row.momentum_pct)}" for row in falling)
         )
+    lines.append("-# 热度反映讨论关注度，不预测价格，非投资建议")
     return "\n".join(lines).strip()
 
 

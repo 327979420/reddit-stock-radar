@@ -16,7 +16,12 @@ from app.database.session import Database
 from app.discord.client import DiscordSender, DiscordWebhookSender
 from app.discord.formatter import format_radar
 from app.scoring.service import ScoringService
-from app.summary.service import HotPostsSummarizer, build_hot_posts_embed, prepare_posts
+from app.summary.service import (
+    HotPostsSummarizer,
+    build_hot_posts_embed,
+    is_recurring_thread,
+    prepare_posts,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -164,8 +169,11 @@ class RadarJobs:
                 select(RedditPost)
                 .where(RedditPost.created_at >= cutoff)
                 .order_by((RedditPost.score + RedditPost.num_comments * 2).desc())
-                .limit(summary_config.post_count)
+                .limit(summary_config.post_count * 4)
             ).all()
+            posts = [post for post in posts if not is_recurring_thread(post.title)][
+                : summary_config.post_count
+            ]
             if not posts:
                 logger.warning("hot_posts_summary_skipped_no_posts")
                 return False

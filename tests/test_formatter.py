@@ -1,3 +1,4 @@
+from dataclasses import replace
 from datetime import UTC, datetime
 
 from app.discord.formatter import format_radar, rank_marker, split_discord_message
@@ -33,12 +34,36 @@ def test_rank_markers():
 
 
 def test_discord_format():
-    text = format_radar([metric()], datetime(2026, 8, 13, tzinfo=UTC))
-    assert "NVDA" in text
-    assert "TICKER" in text
-    assert "HEAT" in text
-    assert "  96" in text
-    assert "+32%" in text
+    rows = [
+        replace(metric(), ticker=ticker, rank=rank, momentum_pct=change, trend=trend)
+        for rank, (ticker, change, trend) in enumerate(
+            [
+                ("NVDA", 32, "Rising"),
+                ("TSLA", -40, "Falling"),
+                ("AMD", 10, "Rising"),
+                ("CSCO", None, "New / Breakout"),
+                ("MU", -5, "Falling"),
+            ],
+            1,
+        )
+    ]
+    text = format_radar(rows, datetime(2026, 8, 13, tzinfo=UTC))
+    assert text.startswith("## 🔥 Reddit 美股热度榜 · 8月13日")
+    assert "### 🥇 NVDA · NVIDIA" in text
+    assert "-# 热度 96 · 提及 3,420 · 24h +32% · 排名 ↑3" in text
     assert "```text" in text
+    assert "TICKER" in text
+    assert " 4  CSCO" in text
+    assert "NEW" in text
+    assert "📈 **升温**　NVDA +32% · AMD +10%" in text
+    assert "🆕 **新上榜**　CSCO" in text
+    assert "📉 **降温**　TSLA -40% · MU -5%" in text
     assert "\n\n" not in text
     assert all(len(chunk) <= 2000 for chunk in split_discord_message(text))
+
+
+def test_rising_excludes_falling_tickers():
+    rows = [replace(metric(), momentum_pct=-10, trend="Falling")]
+    text = format_radar(rows, datetime(2026, 8, 13, tzinfo=UTC))
+    assert "升温" not in text
+    assert "```" not in text
