@@ -1,10 +1,17 @@
 from __future__ import annotations
 
+import re
 from datetime import datetime
 
 from app.scoring.service import MetricRow
 
 MEDALS = ("🥇", "🥈", "🥉")
+# Legal and share-class endings that add length but no meaning in a headline.
+COMPANY_SUFFIX = re.compile(
+    r"[\s,]+(inc|corp|corporation|co|company|ltd|limited|plc|holding|holdings|trust|"
+    r"class [a-z]|series \d+|&)\.?$",
+    re.IGNORECASE,
+)
 
 
 def rank_marker(change: int | None) -> str:
@@ -23,6 +30,22 @@ def pct(value: float | None, trend: str = "") -> str:
     return f"{value:+.0f}%"
 
 
+def short_company(name: str, ticker: str, limit: int = 24) -> str:
+    name = name.strip()
+    all_caps = name.isupper()
+    while (trimmed := COMPANY_SUFFIX.sub("", name).strip(" ,.")) != name:
+        name = trimmed
+    if all_caps:
+        # SEC names arrive in capitals; keep tickers and vowel-less acronyms (QQQ, SPDR).
+        name = " ".join(
+            word if word == ticker or not re.search(r"[AEIOUY]", word) else word.capitalize()
+            for word in name.split()
+        )
+    if len(name) > limit:
+        name = name[: limit + 1].rsplit(" ", 1)[0].rstrip(" ,&") + "…"
+    return "" if name.upper() == ticker.upper() else name
+
+
 def window_label(window: str) -> str:
     return window.replace("h", " 小时").replace("d", " 天")
 
@@ -35,7 +58,8 @@ def format_radar(rows: list[MetricRow], now: datetime, window: str = "24h", limi
     ]
     # The top three are the headline; Discord headings give them real visual weight.
     for medal, row in zip(MEDALS, rows):
-        company = f" · {row.company[:24]}" if row.company and row.company != row.ticker else ""
+        name = short_company(row.company or "", row.ticker)
+        company = f" · {name}" if name else ""
         lines.append(f"### {medal} {row.ticker}{company}")
         lines.append(
             f"-# 热度 {row.heat_score:.0f} · 提及 {row.mentions:,} · "

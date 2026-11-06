@@ -1,7 +1,12 @@
 from dataclasses import replace
 from datetime import UTC, datetime
 
-from app.discord.formatter import format_radar, rank_marker, split_discord_message
+from app.discord.formatter import (
+    format_radar,
+    rank_marker,
+    short_company,
+    split_discord_message,
+)
 from app.scoring.service import MetricRow
 
 
@@ -9,7 +14,7 @@ def metric():
     return MetricRow(
         1,
         "NVDA",
-        "NVIDIA",
+        "NVIDIA Corporation",
         3420,
         500,
         100,
@@ -67,3 +72,16 @@ def test_rising_excludes_falling_tickers():
     text = format_radar(rows, datetime(2026, 8, 13, tzinfo=UTC))
     assert "升温" not in text
     assert "```" not in text
+
+
+def test_short_company_names():
+    assert short_company("MICRON TECHNOLOGY INC", "MU") == "Micron Technology"
+    assert short_company("NVIDIA Corporation", "NVDA") == "NVIDIA"
+    assert short_company("Taiwan Semiconductor Manufacturing Company", "TSM") == (
+        "Taiwan Semiconductor…"
+    )
+    assert short_company("INVESCO QQQ TRUST, SERIES 1", "QQQ") == "Invesco QQQ"
+    assert short_company("SPDR S&P 500 ETF Trust", "SPY") == "SPDR S&P 500 ETF"
+    assert short_company("JPMorgan Chase & Co.", "JPM") == "JPMorgan Chase"
+    assert short_company("Alphabet Inc. Class A", "GOOGL") == "Alphabet"
+    assert short_company("", "XYZ") == ""
