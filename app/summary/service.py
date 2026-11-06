@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+import logging
 import re
 from dataclasses import dataclass
 
-from openai import AsyncOpenAI
+from openai import APIConnectionError, APITimeoutError, AsyncOpenAI
 from pydantic import BaseModel, Field
 
 from app.database.models import RedditPost
+from app.retry import retry_async
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -77,15 +81,23 @@ def build_prompt(posts: list[SummaryPost]) -> str:
 
 class HotPostsSummarizer:
     def __init__(self, api_key: str, model: str):
-        self.client = AsyncOpenAI(api_key=api_key)
+        # Bound each attempt so a sleeping/waking Mac cannot leave the shared
+        # scheduler lock occupied for hours while the network is unavailable.
+        self.client = AsyncOpenAI(api_key=api_key, timeout=30, max_retries=0)
         self.model = model
 
     async def summarize(self, posts: list[SummaryPost]) -> HotPostsDigest:
-        response = await self.client.responses.parse(
-            model=self.model,
-            input=build_prompt(posts),
-            text_format=HotPostsDigest,
-            reasoning={"effort": "low"},
+        response = await retry_async(
+            lambda: self.client.responses.parse(
+                model=self.model,
+                input=build_prompt(posts),
+                text_format=HotPostsDigest,
+                reasoning={"effort": "low"},
+            ),
+            retry_on=(APIConnectionError, APITimeoutError),
+            attempts=4,
+            logger=logger,
+            operation_name="openai_hot_posts_summary",
         )
         if response.output_parsed is None:
             raise RuntimeError("OpenAI returned an empty hot-post summary")
